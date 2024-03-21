@@ -4,13 +4,14 @@ import {useFonts, Roboto_700Bold, Roboto_500Medium, Roboto_400Regular } from '@e
 import { ThemeProvider } from 'styled-components';
 import theme from './src/theme'
 import { Loading } from './src/components/Loading';
+import { RegisterScreen } from './src/screens/RegisterScreen';
 
 export default function App() {
   const [ fontsLoaded ]= useFonts ({Roboto_700Bold, Roboto_500Medium, Roboto_400Regular})
 
   return (
     <ThemeProvider theme={theme}>
-      {fontsLoaded ?  <Home/> : <Loading/>}
+      {fontsLoaded ?  <RegisterScreen/> : <Loading/>}
     </ThemeProvider>
   );
 }
