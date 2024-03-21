@@ -34,7 +34,7 @@ export const ScreenName = styled.Text`
 
 export const Logo = styled.Image.attrs(() => ({
   resizeMode: "contain",
-  source: LogoMyMoney,
+ source: LogoMyMoney,
 }))`
   width: 55px;
   height: 55px;
