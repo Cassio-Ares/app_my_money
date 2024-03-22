@@ -26,6 +26,7 @@ export const Title = styled.Text`
     font-size: ${({ theme})=> theme.FONT_SIZE.LG}px;
     font-family: ${({ theme})=> theme.FONT_FAMILY.BOLD};
   `}
+   margin-bottom: 15px;
 `;
 
 export const ContainerButton = styled.View`

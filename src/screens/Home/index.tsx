@@ -1,57 +1,65 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { api } from "../../server/api";
 import { Container, ContainerBanners, Content, ContainerList } from "./style";
 import { Total } from "../../components/Total";
 import { Banner } from "../../components/Banner";
 import { Header } from "../../components/Header";
-import { TransactionCard, TransactionCardsProps } from "../../components/TransactionCard";
-import { FlatList } from "react-native";
+import {
+  TransactionCard,
+  TransactionCardsProps,
+} from "../../components/TransactionCard";
+import { Alert, FlatList } from "react-native";
+import { Loading } from "../../components/Loading";
+import theme from "../../theme";
 
 export type ListCardType = {
-  id: string,
-} & Pick <TransactionCardsProps,"name" |"type"| "value" |"category" | "date">;
-
-const data: ListCardType[] = [
-  {
-    id: "1",
-    name: "Venda de Bolinho",
-    type: "up",
-    value: "R$ 100, 00",
-    date: "2024-03-20"
-  },
-  {
-    id: "2",
-    name: "Compra de ingrediente para Bolinho",
-    type: "down",
-    category: "Alimentação",
-    value: "R$ 150, 00",
-    date: "2024-03-19"
-  },
-  {
-    id: "3",
-    name: "Freela",
-    type: "up",
-    value: "R$ 200, 00",
-    date: "2024-03-18"
-  },
-  {
-    id: "4",
-    name: "Churrasco",
-    type: "down",
-    category: "Alimentação",
-    value: "R$ 50,00",
-    date: "2024-03-17"
-  },
-  {
-    id: "5",
-    name: "Freela",
-    type: "up",
-    value: "R$ 300, 00",
-    date: "2024-03-16"
-  }
-];
-
+  id: string;
+} & Pick<
+  TransactionCardsProps,
+  "name" | "type" | "value" | "category" | "date"
+>;
 
 export function Home() {
+  const [transaction, setTransactions] = useState<ListCardType[]>();
+  const [loading, setLoading] = useState<boolean>(false);
+
+  async function fetchTransactions() {
+    try {
+      setLoading(true);
+      const { data } = await api.get("/transactions");
+      setTransactions(data);
+    } catch (error) {
+      Alert.alert("Error no servidor, tente mais tarde.")
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  function renderListTransactions(){
+    return(
+      <ContainerList>
+      <FlatList
+        data={transaction}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => (
+          <TransactionCard
+            name={item.name}
+            type={item.type}
+            value={item.value}
+            category={item.category}
+            date={item.date}
+          />
+        )}
+        showsVerticalScrollIndicator={false}
+      />
+    </ContainerList>
+    )
+  }
+
+  useEffect(() => {
+    fetchTransactions();
+  }, []);
+
   return (
     <Container>
       <Header isHome type="up" screenName="MyMoney" />
@@ -61,17 +69,9 @@ export function Home() {
           <Banner title="Entrada" value="R$ 6. 000, 00" type="up" />
           <Banner title="Saida" value="R$ 2. 000, 00" type="down" />
         </ContainerBanners>
-        <ContainerList>
-          <FlatList
-           data={data}
-           keyExtractor={(item)=> item.id}
-           renderItem={({item})=>
-             <TransactionCard  name={item.name} type={item.type} value={item.value} category={item.category} date={item.date}   />
-           } 
-           showsVerticalScrollIndicator={false}        
-          />
-        </ContainerList>
-          
+        
+       { loading ? <Loading background={theme.COLORS.BACKGROUND} loadColor={theme.COLORS.PRIMARY} /> : renderListTransactions()}
+
       </Content>
     </Container>
   );

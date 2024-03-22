@@ -1,9 +1,10 @@
-import { Container, LoadIndicator } from "./style";
+import { Container, LoadIndicator, LoadingTypes} from "./style";
 
-export function Loading() {
+
+  export function Loading({background,  loadColor}: LoadingTypes) {
   return (
-    <Container>
-      <LoadIndicator />
+    <Container background={background} >
+      <LoadIndicator loadColor={loadColor} />
     </Container>
   );
 }

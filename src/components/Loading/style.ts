@@ -1,13 +1,19 @@
 import styled from 'styled-components/native'
 
-export const Container = styled.View`
+
+export type LoadingTypes = {
+    background?:string;
+    loadColor?: string;
+  }
+
+export const Container = styled.View<LoadingTypes>`
    flex: 1;
    justify-content: center;
    align-items: center;
-   background-color: ${({theme})=> theme.COLORS.PRIMARY};
+   background-color: ${({theme, background})=> background ? background : theme.COLORS.PRIMARY};
 `
 
-export const LoadIndicator = styled.ActivityIndicator.attrs(({theme})=> ({
-    color: theme.COLORS.LIGHT,
+export const LoadIndicator = styled.ActivityIndicator.attrs<LoadingTypes>(({theme, loadColor})=> ({
+    color: loadColor ? loadColor : theme.COLORS.LIGHT,
     size: 'large'
-}))``;
+}))<LoadingTypes>``;
