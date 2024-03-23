@@ -1,5 +1,4 @@
-import React, { useEffect, useState } from "react";
-import { api } from "../../server/api";
+import React, { useEffect } from "react";
 import { Container, ContainerBanners, Content, ContainerList } from "./style";
 import { Total } from "../../components/Total";
 import { Banner } from "../../components/Banner";
@@ -8,70 +7,64 @@ import {
   TransactionCard,
   TransactionCardsProps,
 } from "../../components/TransactionCard";
-import { Alert, FlatList } from "react-native";
+import { FlatList } from "react-native";
 import { Loading } from "../../components/Loading";
 import theme from "../../theme";
+import { formatedValue, getTotalForTypes } from "../../helpers/formatted";
+import { useIsFocused } from "@react-navigation/native";
+import { usefetchTransactions } from "../../hooks/useFetchTransactions";
 
-export type ListCardType = {
-  id: string;
-} & Pick<
-  TransactionCardsProps,
-  "name" | "type" | "value" | "category" | "date"
->;
 
 export function Home() {
-  const [transaction, setTransactions] = useState<ListCardType[]>();
-  const [loading, setLoading] = useState<boolean>(false);
+  const{  transactions, loading, fetchTransactions } = usefetchTransactions()
+  
+const {totalDown, totalUp, total} = getTotalForTypes(transactions)
 
-  async function fetchTransactions() {
-    try {
-      setLoading(true);
-      const { data } = await api.get("/transactions");
-      setTransactions(data);
-    } catch (error) {
-      Alert.alert("Error no servidor, tente mais tarde.")
-    } finally {
-      setLoading(false);
-    }
-  }
+const isFocused = useIsFocused()
 
-  function renderListTransactions(){
-    return(
+  function renderListTransactions() {
+    return (
       <ContainerList>
-      <FlatList
-        data={transaction}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <TransactionCard
-            name={item.name}
-            type={item.type}
-            value={item.value}
-            category={item.category}
-            date={item.date}
-          />
-        )}
-        showsVerticalScrollIndicator={false}
-      />
-    </ContainerList>
-    )
+        <FlatList
+          data={transactions}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => (
+            <TransactionCard
+              name={item.name}
+              type={item.type}
+              value={formatedValue(item.value)}
+              category={item.category}
+              date={item.date}
+            />
+          )}
+          showsVerticalScrollIndicator={false}
+        />
+      </ContainerList>
+    );
   }
 
   useEffect(() => {
     fetchTransactions();
-  }, []);
+  }, [isFocused]);
 
   return (
     <Container>
       <Header isHome type="up" screenName="MyMoney" />
       <Content>
-        <Total />
+        <Total value={total}/>
         <ContainerBanners>
-          <Banner title="Entrada" value="R$ 6. 000, 00" type="up" />
-          <Banner title="Saida" value="R$ 2. 000, 00" type="down" />
+          <Banner title="Entrada" value={totalUp} type="up" />
+          <Banner title="Saida" value={totalDown} type="down" />
         </ContainerBanners>
-        
-       { loading ? <Loading background={theme.COLORS.BACKGROUND} loadColor={theme.COLORS.PRIMARY} /> : renderListTransactions()}
 
+        {loading ? (
+          <Loading
+            background={theme.COLORS.BACKGROUND}
+            loadColor={theme.COLORS.PRIMARY}
+          />
+        ) : (
+          renderListTransactions()
+        )}
       </Content>
     </Container>
   );

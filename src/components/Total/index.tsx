@@ -1,10 +1,13 @@
 import { Container, Title } from "./style";
 
+interface TotalProps{
+    value: string;
+}
 
-export function Total(){
+export function Total({value}:TotalProps){
     return(
         <Container>
-            <Title>R$ 5 000,00</Title>
+            <Title>{value}</Title>
         </Container>
     )
 }

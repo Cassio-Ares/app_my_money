@@ -13,24 +13,43 @@ import { Header } from "../../components/Header";
 import { SmallButton } from "../../components/SmallButton";
 import { Input } from "../../components/Input";
 import { CategorySelectButton } from "../../components/CategorySelectButton";
-import { Modal, TouchableWithoutFeedback } from "react-native";
+import { Alert, Modal, TouchableWithoutFeedback } from "react-native";
 import { SelectModal } from "../SelectModal";
 import {  FieldValues, useForm } from "react-hook-form";
 import { Keyboard } from "react-native";
+import { api } from "../../server/api";
+import { format } from "date-fns";
 
-type TypeTransformer = "up" | "down";
+type TypeTransactions = "up" | "down";
+
+type DataType ={
+  name: string,
+  value: number,
+  type: TypeTransactions,
+  category?: string,
+  date: string
+}
 
 export function RegisterScreen() {
-  const [selectType, setSelectType] = useState<TypeTransformer>("up");
+  const [selectType, setSelectType] = useState<TypeTransactions>("up");
   const [isOpenModal, setIsOpenModal] = useState<boolean>(false);
   const [category, setCategory] = useState({
     key: "category",
     name: "Selecione a categoria",
   });
 
-  const { control, handleSubmit } = useForm();
+  const { control, handleSubmit, reset } = useForm();
 
-  function handlePress(type: TypeTransformer) {
+  async function postTransaction(data: DataType){
+    try{
+       await api.post("/transactions", data)
+      console.log(data)
+    }catch(error){
+      Alert.alert("Erro no servidor tente mais tarde")
+    }
+  }
+
+  function handlePress(type: TypeTransactions) {
     setSelectType(type);
   }
 
@@ -42,16 +61,37 @@ export function RegisterScreen() {
     setIsOpenModal(false);
   }
 
+  function clear(){
+    setSelectType('up');
+    setCategory({  key: "category", name: "Selecione a categoria",});
+    reset({
+      name:"",
+      value:"",
+    });
+  }
+
+
   function handleRegister(form: FieldValues) {
+
+    const currentDate = format(new Date(), 'dd/MM/yy' )
+
     const data = {
       name: form.name,
-      amount: form.amount,
-      transactionType: selectType,
+      value: form.value,
+      type: selectType,
       category: category.key,
+      date: currentDate,
     };
 
-    console.log("data", data);
+    if(category.key !== "category"){
+      data.category = category.key;
+    }
+
+    postTransaction(data);
+    clear()
   }
+
+  
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
@@ -87,7 +127,7 @@ export function RegisterScreen() {
               autoCorrect={false}
             />
             <Input
-              name="amount"
+              name="value"
               control={control}
               placeholder="Insira o valor"
               keyboardType="numeric"
