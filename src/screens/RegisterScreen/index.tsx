@@ -43,7 +43,6 @@ export function RegisterScreen() {
   async function postTransaction(data: DataType){
     try{
        await api.post("/transactions", data)
-      console.log(data)
     }catch(error){
       Alert.alert("Erro no servidor tente mais tarde")
     }

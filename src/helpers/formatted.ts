@@ -1,3 +1,4 @@
+import { isSameMonth, isSameYear, parse } from "date-fns";
 import { TransactionCardsProps } from "../components/TransactionCard";
 
 export type ListCardType = {
@@ -45,4 +46,15 @@ export function getTotalForTypes(items: ListCardType[]){
     totalDown: formatedValue(totalDown),
     total: formatedValue(totalUp - totalDown)
    }
+}
+
+
+export function getTransactionsByMonth(transactions: ListCardType[], selectedData: Date){
+   const value = transactions.filter((transaction)=>
+    transaction.type === "down" && 
+    isSameMonth(parse(transaction.date, "dd/MM/yyyy", new Date()), selectedData) &&
+    isSameYear(parse(transaction.date, "dd/MM/yyyy", new Date()), selectedData)
+   )
+
+   return value;
 }
